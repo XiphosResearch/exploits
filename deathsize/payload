@@ -1,0 +1,4 @@
+#!/bin/bash
+touch /tmp/i-am-root
+# Clean up :D
+rm -f /tmp/reset_tcpdump
